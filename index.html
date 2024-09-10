@@ -60,6 +60,9 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        .person:hover img {
+            border-color: #ff9800;
+        }
         .modal {
             display: none;
             position: fixed;
@@ -123,6 +126,13 @@
             <option value="Data Analyst">Data Analyst</option>
             <option value="Chef de projet IT">Chef de projet IT</option>
         </select>
+        <select id="filterInterest" style="padding: 10px; border-radius: 5px; border: 2px solid #003366;">
+            <option value="">-- Filtrer par Centres d'Intérêts --</option>
+            <option value="Voyages et tourisme">Voyages et tourisme</option>
+            <option value="Mode et design">Mode et design</option>
+            <option value="Musique">Musique</option>
+            <option value="Sport">Sport</option>
+        </select>
     </div>
 
     <div class="trombinoscope" id="trombinoscope"></div>
@@ -137,10 +147,11 @@
     </div>
 
     <script>
+        // Charger le fichier JSON via fetch
         fetch('collaborateurs.json')
             .then(response => response.json())
             .then(data => {
-                generateTrombinoscope(1, data); 
+                generateTrombinoscope(1, data); // Passer les données JSON à la fonction
             });
 
         const itemsPerPage = 20;
@@ -149,6 +160,7 @@
         document.getElementById('searchName').addEventListener('input', filterPeople);
         document.getElementById('filterDepartment').addEventListener('change', filterPeople);
         document.getElementById('filterPosition').addEventListener('change', filterPeople);
+        document.getElementById('filterInterest').addEventListener('change', filterPeople);
 
         function generateTrombinoscope(page, data) {
             const trombinoscope = document.getElementById('trombinoscope');
@@ -167,8 +179,8 @@
                         <strong>Nom :</strong> ${data[i]["Nom et Prénom"]}<br>
                         <strong class="job">Poste :</strong> ${data[i].poste}<br>
                         <strong class="department">Département :</strong> ${data[i]["Département ou équipe"]}<br>
+                        <strong class="interests">Centres d'intérêts :</strong> ${data[i]["Quels sont vos centres d'intérêts ?"]}<br>
                         <strong>Email :</strong> ${data[i]["Votre adresse mail"]}<br>
-                        <strong>Centres d'intérêts :</strong> ${data[i]["Quels sont vos centres d'intérêts ?"]}<br>
                     </div>
                 `;
                 person.querySelector('img').addEventListener('click', function() {
@@ -176,6 +188,7 @@
                 });
                 trombinoscope.appendChild(person);
             }
+
             generatePagination(data);
         }
 
@@ -202,6 +215,7 @@
             const nameInput = document.getElementById('searchName').value.toLowerCase();
             const departmentFilter = document.getElementById('filterDepartment').value.toLowerCase();
             const positionFilter = document.getElementById('filterPosition').value.toLowerCase();
+            const interestFilter = document.getElementById('filterInterest').value.toLowerCase();
 
             const people = document.getElementsByClassName('person');
 
@@ -209,12 +223,14 @@
                 const name = people[i].getElementsByClassName('fixed-info')[0].textContent.toLowerCase();
                 const department = people[i].getElementsByClassName('department')[0].textContent.toLowerCase();
                 const position = people[i].getElementsByClassName('job')[0].textContent.toLowerCase();
+                const interests = people[i].getElementsByClassName('interests')[0].textContent.toLowerCase();
 
                 const matchesName = name.includes(nameInput);
                 const matchesDepartment = department.includes(departmentFilter) || departmentFilter === "";
                 const matchesPosition = position.includes(positionFilter) || positionFilter === "";
+                const matchesInterests = interests.includes(interestFilter) || interestFilter === "";
 
-                if (matchesName && matchesDepartment && matchesPosition) {
+                if (matchesName && matchesDepartment && matchesPosition && matchesInterests) {
                     people[i].style.display = "";
                 } else {
                     people[i].style.display = "none";
