@@ -127,43 +127,50 @@
 
     <div class="pagination" id="pagination"></div>
 
+    <div id="modal" class="modal">
+        <div class="modal-content" id="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modal-details"></div>
+        </div>
+    </div>
+
     <script>
-        // Données statiques à la place de Google Sheets
-        const data = [
-            { imageUrl: "https://via.placeholder.com/150", nom: "Jean Dupont", poste: "Développeur Web", email: "jean.dupont@example.com", centresInterets: "Football, Lecture", telephone: "01 23 45 67 89", linkedin: "https://www.linkedin.com/in/jeandupont" },
-            { imageUrl: "https://via.placeholder.com/150", nom: "Marie Martin", poste: "Chef de Projet", email: "marie.martin@example.com", centresInterets: "Voyage, Peinture", telephone: "01 23 45 67 88", linkedin: "https://www.linkedin.com/in/mariemartin" },
-            // Ajoute plus de données ici
-        ];
+        // Charger le fichier JSON via fetch
+        fetch('collaborateurs.json')
+            .then(response => response.json())
+            .then(data => {
+                generateTrombinoscope(1, data); // Passer les données JSON à la fonction
+            });
 
         const itemsPerPage = 20;
         let currentPage = 1;
 
-        function generateTrombinoscope(page) {
+        function generateTrombinoscope(page, data) {
             const trombinoscope = document.getElementById('trombinoscope');
-            trombinoscope.innerHTML = '';  // Vide la section avant de remplir
-
+            trombinoscope.innerHTML = '';  // Vide le conteneur
             const start = (page - 1) * itemsPerPage;
             const end = Math.min(start + itemsPerPage, data.length);
 
             for (let i = start; i < end; i++) {
                 const person = document.createElement('div');
                 person.classList.add('person');
+                const imageUrl = data[i]["Vous pouvez ajouter une photo pour personnaliser votre profil et permettre aux autres de mieux associer votre visage à votre nom."] || "https://via.placeholder.com/150";
                 person.innerHTML = `
-                    <img src="${data[i].imageUrl}" alt="Photo de ${data[i].nom}">
+                    <img src="${imageUrl}" alt="Photo de ${data[i].nom}" onclick="openModal(${i}, data)">
                     <div class="fixed-info">
-                        <strong>Nom :</strong> ${data[i].nom}<br>
+                        <strong>Nom :</strong> ${data[i]["Nom et Prénom"]}<br>
                         <strong class="job">Poste :</strong> ${data[i].poste}<br>
-                        <strong>Email :</strong> ${data[i].email}<br>
-                        <strong>Centres d'intérêts :</strong> ${data[i].centresInterets}<br>
+                        <strong>Email :</strong> ${data[i]["Votre adresse mail"]}<br>
+                        <strong>Centres d'intérêts :</strong> ${data[i]["Quels sont vos centres d'intérêts ?"]}<br>
                     </div>
                 `;
                 trombinoscope.appendChild(person);
             }
 
-            generatePagination();
+            generatePagination(data);
         }
 
-        function generatePagination() {
+        function generatePagination(data) {
             const pagination = document.getElementById('pagination');
             pagination.innerHTML = '';
             const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -173,7 +180,7 @@
                 button.innerText = page;
                 button.onclick = () => {
                     currentPage = page;
-                    generateTrombinoscope(page);
+                    generateTrombinoscope(page, data);
                 };
                 if (page === currentPage) {
                     button.style.fontWeight = 'bold';
@@ -191,8 +198,25 @@
             }
         }
 
-        // Initialisation
-        generateTrombinoscope(1);
+        function openModal(index, data) {
+            const modal = document.getElementById('modal');
+            const modalDetails = document.getElementById('modal-details');
+            const person = data[index];
+            modalDetails.innerHTML = `
+                <strong>Nom :</strong> ${person["Nom et Prénom"]}<br>
+                <strong>Téléphone :</strong> ${person["Numéro de téléphone"] || 'Non renseigné'}<br>
+                <strong>Email :</strong> ${person["Votre adresse mail"]}<br>
+                <strong>Centres d'intérêts :</strong> ${person["Quels sont vos centres d'intérêts ?"] || 'Non renseigné'}<br>
+                <strong>LinkedIn :</strong> <a href="${person["Profil linkedin"] || '#'}" target="_blank">Voir le profil</a><br>
+            `;
+            modal.style.display = "block";
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = "none";
+        }
     </script>
+
 </body>
 </html>
