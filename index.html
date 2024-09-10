@@ -93,6 +93,16 @@
             text-align: center;
             margin-top: 20px;
         }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
         @media (max-width: 768px) {
             .person {
                 width: 90%;
@@ -171,7 +181,7 @@
             for (let i = start; i < end; i++) {
                 const person = document.createElement('div');
                 person.classList.add('person');
-                const imageUrl = data[i]["Vous pouvez ajouter une photo"] || "https://via.placeholder.com/150";
+                const imageUrl = data[i]["Vous pouvez ajouter une photo pour personnaliser votre profil et permettre aux autres de mieux associer votre visage à votre nom."] || "https://via.placeholder.com/150";
                 
                 person.innerHTML = `
                     <img src="${imageUrl}" alt="Photo de ${data[i]["Nom et Prénom"]}">
@@ -242,11 +252,20 @@
             const modal = document.getElementById('modal');
             const modalDetails = document.getElementById('modal-details');
             const person = data[index];
+
             modalDetails.innerHTML = `
                 <strong>Nom :</strong> ${person["Nom et Prénom"]}<br>
-                <strong>Téléphone :</strong> ${person["Numéro de téléphone"] || 'Non renseigné'}<br>
+                <strong>Poste :</strong> ${person["poste"] || 'Non renseigné'}<br>
                 <strong>Email :</strong> ${person["Votre adresse mail"]}<br>
+                <strong>Téléphone :</strong> ${person["Numéro de téléphone"] || 'Non renseigné'}<br>
+                <strong>Département ou équipe :</strong> ${person["Département ou équipe"] || 'Non renseigné'}<br>
+                <strong>Statut professionnel :</strong> ${person["Statut professionnel"] || 'Non renseigné'}<br>
+                <strong>Décrivez en 1 à 10 lignes votre métier :</strong> ${person["Décrivez en 1 à 10 lignes votre métier"] || 'Non renseigné'}<br>
+                <strong>Le mail de votre supérieur hiérarchique :</strong> ${person["Le mail de votre supérieur hiérarchique"] || 'Non renseigné'}<br>
+                <strong>Bâtiment :</strong> ${person["Bâtiment"] || 'Non renseigné'}<br>
+                <strong>Étage :</strong> ${person["Etage"] || 'Non renseigné'}<br>
                 <strong>Centres d'intérêts :</strong> ${person["Quels sont vos centres d'intérêts ?"] || 'Non renseigné'}<br>
+                <strong>Quelle compétence ou activité aimeriez-vous apprendre ? :</strong> ${person["Quelle compétence ou activité aimeriez-vous apprendre ?"] || 'Non renseigné'}<br>
                 <strong>LinkedIn :</strong> <a href="${person["Profil linkedin"] || '#'}" target="_blank">Voir le profil</a><br>
             `;
             modal.style.display = "block";
