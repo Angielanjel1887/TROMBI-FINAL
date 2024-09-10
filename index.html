@@ -210,14 +210,20 @@
             const modalDetails = document.getElementById('modal-details');
             const person = data[index];
 
-            modalDetails.innerHTML = `
-                <strong>Nom :</strong> ${person["Nom et Prénom"]}<br>
-                <strong>Téléphone :</strong> ${person["Numéro de téléphone"] || 'Non renseigné'}<br>
-                <strong>Email :</strong> ${person["Votre adresse mail"]}<br>
-                <strong>Centres d'intérêts :</strong> ${person["Quels sont vos centres d'intérêts ?"] || 'Non renseigné'}<br>
-                <strong>LinkedIn :</strong> <a href="${person["Profil linkedin"] || '#'}" target="_blank">Voir le profil</a><br>
-            `;
-
+          modalDetails.innerHTML = `
+        <strong>Poste :</strong> ${person["poste"] || 'Non renseigné'}<br>
+        <strong>Email :</strong> ${person["Votre adresse mail"]}<br>
+        <strong>Téléphone :</strong> ${person["Numéro de téléphone"] || 'Non renseigné'}<br>
+        <strong>Département ou équipe :</strong> ${person["Département ou équipe"] || 'Non renseigné'}<br>
+        <strong>Statut professionnel :</strong> ${person["Statut professionnel"] || 'Non renseigné'}<br>
+        <strong>Décrivez en 1 à 10 lignes votre métier :</strong> ${person["Décrivez en 1 à 10 lignes votre métier"] || 'Non renseigné'}<br>
+        <strong>Le mail de votre supérieur hiérarchique :</strong> ${person["Le mail de votre supérieur hiérarchique"] || 'Non renseigné'}<br>
+        <strong>Bâtiment :</strong> ${person["Bâtiment"] || 'Non renseigné'}<br>
+        <strong>Étage :</strong> ${person["Etage"] || 'Non renseigné'}<br>
+        <strong>Centres d'intérêts :</strong> ${person["Quels sont vos centres d'intérêts ?"] || 'Non renseigné'}<br>
+        <strong>Quelle compétence ou activité aimeriez-vous apprendre ? :</strong> ${person["Quelle compétence ou activité aimeriez-vous apprendre ?"] || 'Non renseigné'}<br>
+        <strong>LinkedIn :</strong> <a href="${person["Profil linkedin"] || '#'}" target="_blank">Voir le profil</a><br>
+    `;
             modal.style.display = "block";
         }
 
