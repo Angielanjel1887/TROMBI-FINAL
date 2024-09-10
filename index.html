@@ -150,25 +150,29 @@
             trombinoscope.innerHTML = '';  // Vide le conteneur
             const start = (page - 1) * itemsPerPage;
             const end = Math.min(start + itemsPerPage, data.length);
-for (let i = start; i < end; i++) {
-    const person = document.createElement('div');
-    person.classList.add('person');
-    const imageUrl = data[i]["Vous pouvez ajouter une photo pour personnaliser votre profil et permettre aux autres de mieux associer votre visage à votre nom."] || "https://via.placeholder.com/150";
-    
-    person.innerHTML = `
-        <img src="${imageUrl}" alt="Photo de ${data[i]["Nom et Prénom"]}">
-        <div class="fixed-info">
-            <strong>Nom :</strong> ${data[i]["Nom et Prénom"]}<br>
-            <strong class="job">Poste :</strong> ${data[i].poste}<br>
-            <strong>Email :</strong> ${data[i]["Votre adresse mail"]}<br>
-            <strong>Centres d'intérêts :</strong> ${data[i]["Quels sont vos centres d'intérêts ?"]}<br>
-        </div>
-    `;
+            
+            for (let i = start; i < end; i++) {
+                const person = document.createElement('div');
+                person.classList.add('person');
+                const imageUrl = data[i]["Vous pouvez ajouter une photo pour personnaliser votre profil et permettre aux autres de mieux associer votre visage à votre nom."] || "https://via.placeholder.com/150";
+                
+                person.innerHTML = `
+                    <img src="${imageUrl}" alt="Photo de ${data[i]["Nom et Prénom"]}">
+                    <div class="fixed-info">
+                        <strong>Nom :</strong> ${data[i]["Nom et Prénom"]}<br>
+                        <strong class="job">Poste :</strong> ${data[i].poste}<br>
+                        <strong>Email :</strong> ${data[i]["Votre adresse mail"]}<br>
+                        <strong>Centres d'intérêts :</strong> ${data[i]["Quels sont vos centres d'intérêts ?"]}<br>
+                    </div>
+                `;
 
-    // Ajouter un écouteur d'événements pour ouvrir la modale
-    person.querySelector('img').addEventListener('click', function() {
-        openModal(i, data); // Passer l'index et le
+                // Ajouter un écouteur d'événements pour ouvrir la modale
+                person.querySelector('img').addEventListener('click', () => {
+                    openModal(i, data); // Passer l'index et les données
+                });
 
+                trombinoscope.appendChild(person);
+            }
 
             generatePagination(data);
         }
@@ -202,23 +206,20 @@ for (let i = start; i < end; i++) {
         }
 
         function openModal(index, data) {
-    const modal = document.getElementById('modal');
-    const modalDetails = document.getElementById('modal-details');
+            const modal = document.getElementById('modal');
+            const modalDetails = document.getElementById('modal-details');
+            const person = data[index];
 
-    // Parse les données JSON passées en chaîne de caractères
-    const parsedData = JSON.parse(data);
-    const person = parsedData[index];
+            modalDetails.innerHTML = `
+                <strong>Nom :</strong> ${person["Nom et Prénom"]}<br>
+                <strong>Téléphone :</strong> ${person["Numéro de téléphone"] || 'Non renseigné'}<br>
+                <strong>Email :</strong> ${person["Votre adresse mail"]}<br>
+                <strong>Centres d'intérêts :</strong> ${person["Quels sont vos centres d'intérêts ?"] || 'Non renseigné'}<br>
+                <strong>LinkedIn :</strong> <a href="${person["Profil linkedin"] || '#'}" target="_blank">Voir le profil</a><br>
+            `;
 
-    modalDetails.innerHTML = `
-        <strong>Nom :</strong> ${person["Nom et Prénom"]}<br>
-        <strong>Téléphone :</strong> ${person["Numéro de téléphone"] || 'Non renseigné'}<br>
-        <strong>Email :</strong> ${person["Votre adresse mail"]}<br>
-        <strong>Centres d'intérêts :</strong> ${person["Quels sont vos centres d'intérêts ?"] || 'Non renseigné'}<br>
-        <strong>LinkedIn :</strong> <a href="${person["Profil linkedin"] || '#'}" target="_blank">Voir le profil</a><br>
-    `;
-
-    modal.style.display = "block";
-}
+            modal.style.display = "block";
+        }
 
         function closeModal() {
             const modal = document.getElementById('modal');
@@ -228,3 +229,4 @@ for (let i = start; i < end; i++) {
 
 </body>
 </html>
+
