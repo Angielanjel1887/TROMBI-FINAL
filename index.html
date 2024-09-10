@@ -19,6 +19,10 @@
         .header img {
             max-width: 150px;
         }
+        .filters {
+            text-align: center;
+            margin: 20px 0;
+        }
         .trombinoscope {
             display: flex;
             flex-wrap: wrap;
@@ -56,9 +60,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .person:hover img {
-            border-color: #ff9800;
-        }
         .modal {
             display: none;
             position: fixed;
@@ -85,16 +86,6 @@
             font-weight: bold;
             cursor: pointer;
         }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
         .pagination {
             text-align: center;
             margin-top: 20px;
@@ -118,9 +109,20 @@
         <p>Bienvenue au sein de la DTI.</p>
     </div>
 
-    <div style="text-align: center; margin: 20px 0;">
-        <p>🔍 Utilisez la barre de recherche pour filtrer les membres de l'équipe.</p>
-        <input type="text" id="searchInput" onkeyup="filterPeople()" placeholder="Rechercher par nom ou poste..." style="width: 100%; padding: 10px; border-radius: 5px; border: 2px solid #003366;">
+    <div class="filters">
+        <input type="text" id="searchName" placeholder="Rechercher par nom" style="padding: 10px; border-radius: 5px; border: 2px solid #003366;">
+        <select id="filterDepartment" style="padding: 10px; border-radius: 5px; border: 2px solid #003366;">
+            <option value="">-- Filtrer par Département --</option>
+            <option value="DTI">DTI</option>
+            <option value="Data">Data</option>
+            <option value="Développement">Développement</option>
+        </select>
+        <select id="filterPosition" style="padding: 10px; border-radius: 5px; border: 2px solid #003366;">
+            <option value="">-- Filtrer par Poste --</option>
+            <option value="Ingénieur logiciel">Ingénieur logiciel</option>
+            <option value="Data Analyst">Data Analyst</option>
+            <option value="Chef de projet IT">Chef de projet IT</option>
+        </select>
     </div>
 
     <div class="trombinoscope" id="trombinoscope"></div>
@@ -135,45 +137,45 @@
     </div>
 
     <script>
-        // Charger le fichier JSON via fetch
         fetch('collaborateurs.json')
             .then(response => response.json())
             .then(data => {
-                generateTrombinoscope(1, data); // Passer les données JSON à la fonction
+                generateTrombinoscope(1, data); 
             });
 
         const itemsPerPage = 20;
         let currentPage = 1;
 
+        document.getElementById('searchName').addEventListener('input', filterPeople);
+        document.getElementById('filterDepartment').addEventListener('change', filterPeople);
+        document.getElementById('filterPosition').addEventListener('change', filterPeople);
+
         function generateTrombinoscope(page, data) {
             const trombinoscope = document.getElementById('trombinoscope');
-            trombinoscope.innerHTML = '';  // Vide le conteneur
+            trombinoscope.innerHTML = '';  
             const start = (page - 1) * itemsPerPage;
             const end = Math.min(start + itemsPerPage, data.length);
-            
+
             for (let i = start; i < end; i++) {
                 const person = document.createElement('div');
                 person.classList.add('person');
-                const imageUrl = data[i]["Vous pouvez ajouter une photo pour personnaliser votre profil et permettre aux autres de mieux associer votre visage à votre nom."] || "https://via.placeholder.com/150";
+                const imageUrl = data[i]["Vous pouvez ajouter une photo"] || "https://via.placeholder.com/150";
                 
                 person.innerHTML = `
                     <img src="${imageUrl}" alt="Photo de ${data[i]["Nom et Prénom"]}">
                     <div class="fixed-info">
                         <strong>Nom :</strong> ${data[i]["Nom et Prénom"]}<br>
                         <strong class="job">Poste :</strong> ${data[i].poste}<br>
+                        <strong class="department">Département :</strong> ${data[i]["Département ou équipe"]}<br>
                         <strong>Email :</strong> ${data[i]["Votre adresse mail"]}<br>
                         <strong>Centres d'intérêts :</strong> ${data[i]["Quels sont vos centres d'intérêts ?"]}<br>
                     </div>
                 `;
-
-                // Ajouter un écouteur d'événements pour ouvrir la modale
-                person.querySelector('img').addEventListener('click', () => {
-                    openModal(i, data); // Passer l'index et les données
+                person.querySelector('img').addEventListener('click', function() {
+                    openModal(i, data);
                 });
-
                 trombinoscope.appendChild(person);
             }
-
             generatePagination(data);
         }
 
@@ -197,11 +199,26 @@
         }
 
         function filterPeople() {
-            const input = document.getElementById('searchInput').value.toLowerCase();
+            const nameInput = document.getElementById('searchName').value.toLowerCase();
+            const departmentFilter = document.getElementById('filterDepartment').value.toLowerCase();
+            const positionFilter = document.getElementById('filterPosition').value.toLowerCase();
+
             const people = document.getElementsByClassName('person');
+
             for (let i = 0; i < people.length; i++) {
                 const name = people[i].getElementsByClassName('fixed-info')[0].textContent.toLowerCase();
-                people[i].style.display = name.includes(input) ? "" : "none";
+                const department = people[i].getElementsByClassName('department')[0].textContent.toLowerCase();
+                const position = people[i].getElementsByClassName('job')[0].textContent.toLowerCase();
+
+                const matchesName = name.includes(nameInput);
+                const matchesDepartment = department.includes(departmentFilter) || departmentFilter === "";
+                const matchesPosition = position.includes(positionFilter) || positionFilter === "";
+
+                if (matchesName && matchesDepartment && matchesPosition) {
+                    people[i].style.display = "";
+                } else {
+                    people[i].style.display = "none";
+                }
             }
         }
 
@@ -209,21 +226,13 @@
             const modal = document.getElementById('modal');
             const modalDetails = document.getElementById('modal-details');
             const person = data[index];
-
-          modalDetails.innerHTML = `
-        <strong>Poste :</strong> ${person["poste"] || 'Non renseigné'}<br>
-        <strong>Email :</strong> ${person["Votre adresse mail"]}<br>
-        <strong>Téléphone :</strong> ${person["Numéro de téléphone"] || 'Non renseigné'}<br>
-        <strong>Département ou équipe :</strong> ${person["Département ou équipe"] || 'Non renseigné'}<br>
-        <strong>Statut professionnel :</strong> ${person["Statut professionnel"] || 'Non renseigné'}<br>
-        <strong>Décrivez en 1 à 10 lignes votre métier :</strong> ${person["Décrivez en 1 à 10 lignes votre métier"] || 'Non renseigné'}<br>
-        <strong>Le mail de votre supérieur hiérarchique :</strong> ${person["Le mail de votre supérieur hiérarchique"] || 'Non renseigné'}<br>
-        <strong>Bâtiment :</strong> ${person["Bâtiment"] || 'Non renseigné'}<br>
-        <strong>Étage :</strong> ${person["Etage"] || 'Non renseigné'}<br>
-        <strong>Centres d'intérêts :</strong> ${person["Quels sont vos centres d'intérêts ?"] || 'Non renseigné'}<br>
-        <strong>Quelle compétence ou activité aimeriez-vous apprendre ? :</strong> ${person["Quelle compétence ou activité aimeriez-vous apprendre ?"] || 'Non renseigné'}<br>
-        <strong>LinkedIn :</strong> <a href="${person["Profil linkedin"] || '#'}" target="_blank">Voir le profil</a><br>
-    `;
+            modalDetails.innerHTML = `
+                <strong>Nom :</strong> ${person["Nom et Prénom"]}<br>
+                <strong>Téléphone :</strong> ${person["Numéro de téléphone"] || 'Non renseigné'}<br>
+                <strong>Email :</strong> ${person["Votre adresse mail"]}<br>
+                <strong>Centres d'intérêts :</strong> ${person["Quels sont vos centres d'intérêts ?"] || 'Non renseigné'}<br>
+                <strong>LinkedIn :</strong> <a href="${person["Profil linkedin"] || '#'}" target="_blank">Voir le profil</a><br>
+            `;
             modal.style.display = "block";
         }
 
@@ -235,4 +244,3 @@
 
 </body>
 </html>
-
