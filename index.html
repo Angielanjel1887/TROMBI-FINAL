@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trombinoscope Dynamique</title>
+    <style>
+        body {
+            font-family: "Roboto", sans-serif;
+            background: linear-gradient(45deg, #e3f2fd, #ffffff);
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            padding: 20px;
+            background-color: #003366;
+            color: white;
+        }
+        .header img {
+            max-width: 150px;
+        }
+        .trombinoscope {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: auto;
+            padding: 20px;
+            max-width: 1200px;
+        }
+        .person {
+            position: relative;
+            margin: 10px;
+            text-align: center;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 250px;
+            overflow: hidden;
+            padding: 20px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .person:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        .person img {
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border: 3px solid #003366;
+        }
+        .fixed-info {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .person:hover img {
+            border-color: #ff9800;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            position: relative;
+            margin: 10% auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            width: 50%;
+        }
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            .person {
+                width: 90%;
+                margin-bottom: 20px;
+            }
+            .trombinoscope {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="https://i.imgur.com/FGFMRD5.jpg" alt="M6 Logo">
+        <h1>DIRECTION DES TECHNOLOGIES DE L'INNOVATION</h1>
+        <p>Bienvenue au sein de la DTI.</p>
+    </div>
+
+    <div style="text-align: center; margin: 20px 0;">
+        <p>🔍 Utilisez la barre de recherche pour filtrer les membres de l'équipe.</p>
+        <input type="text" id="searchInput" onkeyup="filterPeople()" placeholder="Rechercher par nom ou poste..." style="width: 100%; padding: 10px; border-radius: 5px; border: 2px solid #003366;">
+    </div>
+
+    <div class="trombinoscope" id="trombinoscope"></div>
+
+    <div class="pagination" id="pagination"></div>
+
+    <script>
+        // Données statiques à la place de Google Sheets
+        const data = [
+            { imageUrl: "https://via.placeholder.com/150", nom: "Jean Dupont", poste: "Développeur Web", email: "jean.dupont@example.com", centresInterets: "Football, Lecture", telephone: "01 23 45 67 89", linkedin: "https://www.linkedin.com/in/jeandupont" },
+            { imageUrl: "https://via.placeholder.com/150", nom: "Marie Martin", poste: "Chef de Projet", email: "marie.martin@example.com", centresInterets: "Voyage, Peinture", telephone: "01 23 45 67 88", linkedin: "https://www.linkedin.com/in/mariemartin" },
+            // Ajoute plus de données ici
+        ];
+
+        const itemsPerPage = 20;
+        let currentPage = 1;
+
+        function generateTrombinoscope(page) {
+            const trombinoscope = document.getElementById('trombinoscope');
+            trombinoscope.innerHTML = '';  // Vide la section avant de remplir
+
+            const start = (page - 1) * itemsPerPage;
+            const end = Math.min(start + itemsPerPage, data.length);
+
+            for (let i = start; i < end; i++) {
+                const person = document.createElement('div');
+                person.classList.add('person');
+                person.innerHTML = `
+                    <img src="${data[i].imageUrl}" alt="Photo de ${data[i].nom}">
+                    <div class="fixed-info">
+                        <strong>Nom :</strong> ${data[i].nom}<br>
+                        <strong class="job">Poste :</strong> ${data[i].poste}<br>
+                        <strong>Email :</strong> ${data[i].email}<br>
+                        <strong>Centres d'intérêts :</strong> ${data[i].centresInterets}<br>
+                    </div>
+                `;
+                trombinoscope.appendChild(person);
+            }
+
+            generatePagination();
+        }
+
+        function generatePagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            const totalPages = Math.ceil(data.length / itemsPerPage);
+
+            for (let page = 1; page <= totalPages; page++) {
+                const button = document.createElement('button');
+                button.innerText = page;
+                button.onclick = () => {
+                    currentPage = page;
+                    generateTrombinoscope(page);
+                };
+                if (page === currentPage) {
+                    button.style.fontWeight = 'bold';
+                }
+                pagination.appendChild(button);
+            }
+        }
+
+        function filterPeople() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const people = document.getElementsByClassName('person');
+            for (let i = 0; i < people.length; i++) {
+                const name = people[i].getElementsByClassName('fixed-info')[0].textContent.toLowerCase();
+                people[i].style.display = name.includes(input) ? "" : "none";
+            }
+        }
+
+        // Initialisation
+        generateTrombinoscope(1);
+    </script>
+</body>
+</html>
