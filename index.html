@@ -1,184 +1,402 @@
-<script>
-    let allData = [];
-    const itemsPerPage = 20;
-    let currentPage = 1;
-
-    fetch('./collaborateurs.json')
-        .then(response => response.json())
-        .then(data => {
-            allData = data;
-            generatePositionsFilter(data);
-            generateDepartmentsFilter(data);
-            generateInterestsFilter(data); // Générer les options du filtre Centres d'Intérêts
-            generateTrombinoscope(1, allData);
-            updateCollaboratorCount(allData.length); // Initialiser le compteur de collaborateurs
-        });
-
-    // Événements pour filtrer
-    document.getElementById('searchName').addEventListener('input', filterPeople);
-    document.getElementById('filterDepartment').addEventListener('change', filterPeople);
-    document.getElementById('filterPosition').addEventListener('change', filterPeople);
-    document.getElementById('filterInterest').addEventListener('change', filterPeople);
-
-    // Générer les options des filtres
-    function generatePositionsFilter(data) {
-        const filterPosition = document.getElementById('filterPosition');
-        const uniquePositions = new Set();
-        data.forEach(person => {
-            if (person["poste"]) {
-                uniquePositions.add(person["poste"]);
-            }
-        });
-        uniquePositions.forEach(position => {
-            const option = document.createElement('option');
-            option.value = position;
-            option.textContent = position;
-            filterPosition.appendChild(option);
-        });
-    }
-
-    function generateDepartmentsFilter(data) {
-        const filterDepartment = document.getElementById('filterDepartment');
-        const uniqueDepartments = new Set();
-        data.forEach(person => {
-            if (person["équipe"]) {
-                uniqueDepartments.add(person["équipe"]);
-            }
-        });
-        uniqueDepartments.forEach(department => {
-            const option = document.createElement('option');
-            option.value = department;
-            option.textContent = department;
-            filterDepartment.appendChild(option);
-        });
-    }
-
-    function generateInterestsFilter(data) {
-        const filterInterest = document.getElementById('filterInterest');
-        const uniqueInterests = new Set();
-        data.forEach(person => {
-            if (person["Quels sont vos centres d'intérêts ?"]) {
-                const interests = person["Quels sont vos centres d'intérêts ?"].split(', ');
-                interests.forEach(interest => uniqueInterests.add(interest));
-            }
-        });
-        uniqueInterests.forEach(interest => {
-            const option = document.createElement('option');
-            option.value = interest;
-            option.textContent = interest;
-            filterInterest.appendChild(option);
-        });
-    }
-
-    // Filtrer les personnes
-    function filterPeople() {
-        const nameInput = document.getElementById('searchName').value.toLowerCase();
-        const departmentFilter = document.getElementById('filterDepartment').value.toLowerCase();
-        const positionFilter = document.getElementById('filterPosition').value.toLowerCase();
-        const interestFilter = document.getElementById('filterInterest').value.toLowerCase();
-
-        const filteredData = allData.filter(person => {
-            const name = person["Nom et Prénom"].toLowerCase();
-            const department = person["équipe"]?.toLowerCase() || '';
-            const position = person["poste"]?.toLowerCase() || '';
-            const interests = person["Quels sont vos centres d'intérêts ?"]?.toLowerCase() || '';
-
-            return name.includes(nameInput) &&
-                (department.includes(departmentFilter) || departmentFilter === "") &&
-                (position.includes(positionFilter) || positionFilter === "") &&
-                (interests.includes(interestFilter) || interestFilter === "");
-        });
-
-        generateTrombinoscope(1, filteredData);
-        updateCollaboratorCount(filteredData.length); // Mettre à jour le compteur après filtrage
-    }
-
-    // Mettre à jour le compteur de collaborateurs
-    function updateCollaboratorCount(count) {
-        const countElement = document.getElementById('collaboratorCount');
-        if (!countElement) {
-            const newCountElement = document.createElement('p');
-            newCountElement.id = 'collaboratorCount';
-            newCountElement.style.textAlign = 'center';
-            newCountElement.style.marginTop = '10px';
-            newCountElement.style.fontSize = '16px';
-            document.body.insertBefore(newCountElement, document.getElementById('trombinoscope'));
-        }
-        // Mettre à jour le texte du compteur
-        document.getElementById('collaboratorCount').textContent = `Collaborateurs affichés : ${count}`;
-    }
-
-    // Générer le trombinoscope
-    function generateTrombinoscope(page, data) {
-        const trombinoscope = document.getElementById('trombinoscope');
-        trombinoscope.innerHTML = '';
-        const start = (page - 1) * itemsPerPage;
-        const end = Math.min(start + itemsPerPage, data.length);
-
-        for (let i = start; i < end; i++) {
-            const person = document.createElement('div');
-            person.classList.add('person');
-            const imageUrl = data[i]["Vous pouvez ajouter une photo pour personnaliser votre profil et permettre aux autres de mieux associer votre visage à votre nom."] || "https://via.placeholder.com/150";
-
-            person.innerHTML = `
-                <img src="${imageUrl}" alt="Photo de ${data[i]["Nom et Prénom"]}" onclick="openModal(${i})">
-                <div class="fixed-info">
-                    <strong>Nom :</strong> ${data[i]["Nom et Prénom"]}<br>
-                    <strong class="job">Poste :</strong> ${data[i].poste || 'Non renseigné'}<br>
-                    <strong class="department">Équipe :</strong> ${data[i]["équipe"] || 'Non renseigné'}<br>
-                    <strong>Email :</strong> ${data[i]["Votre adresse mail"] || 'Non renseigné'}<br>
-                </div>
-            `;
-            trombinoscope.appendChild(person);
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trombinoscope Dynamique</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f7f9fc;
+            margin: 0;
+            padding: 0;
+            color: #333;
         }
 
-        generatePagination(data);
-    }
-
-    // Pagination
-    function generatePagination(data) {
-        const pagination = document.getElementById('pagination');
-        pagination.innerHTML = '';
-        const totalPages = Math.ceil(data.length / itemsPerPage);
-
-        for (let page = 1; page <= totalPages; page++) {
-            const button = document.createElement('button');
-            button.innerText = page;
-            button.onclick = () => {
-                currentPage = page;
-                generateTrombinoscope(page, data);
-            };
-            if (page === currentPage) {
-                button.style.fontWeight = 'bold';
-            }
-            pagination.appendChild(button);
+        /* Header Style */
+        .header {
+            padding: 20px;
+            background-color: #003366;
+            color: white;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-    }
+        .header img {
+            max-width: 100px;
+            display: block;
+            margin: 0 auto;
+        }
+        .header h1 {
+            margin-top: 10px;
+            font-size: 24px;
+        }
 
-    // Ouvrir la modale
-    function openModal(index) {
-        const modal = document.getElementById('modal');
-        const modalDetails = document.getElementById('modal-details');
-        const person = allData[index];
+        /* Flexbox for cards */
+        .trombinoscope {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
 
-        modalDetails.innerHTML = `
-            <strong>Nom :</strong> ${person["Nom et Prénom"]}<br>
-            <strong>Poste :</strong> ${person["poste"] || 'Non renseigné'}<br>
-            <strong>Téléphone :</strong> ${person["Numéro de téléphone"] || 'Non renseigné'}<br>
-            <strong>Équipe :</strong> ${person["équipe"] || 'Non renseigné'}<br>
-            <strong>Statut professionnel :</strong> ${person["Statut professionnel"] || 'Non renseigné'}<br>
-            <strong>Mail du supérieur hiérarchique :</strong> ${person["Le mail de votre supérieur hiérarchique"] || 'Non renseigné'}<br>
-            <strong>Bâtiment :</strong> ${person["Bâtiment"] || 'Non renseigné'}<br>
-            <strong>Étage :</strong> ${person["Etage"] || 'Non renseigné'}<br>
-            <strong>Centres d'intérêts :</strong> ${person["Quels sont vos centres d'intérêts ?"] || 'Non renseigné'}<br>
-            <strong>Profil LinkedIn :</strong> <a href="${person["Profil linkedin"] || '#'}" target="_blank">Voir le profil</a>
-        `;
-        modal.style.display = "block";
-    }
+        /* Style for each person card */
+        .person {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #eee;
+            animation: fadeInUp 0.6s ease-in-out;
+        }
 
-    // Fermer la modale
-    function closeModal() {
-        const modal = document.getElementById('modal');
-        modal.style.display = "none";
-    }
-</script>
+        /* Hover effect */
+        .person:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 123, 255, 0.5), 0 0 10px rgba(0, 123, 255, 0.3);
+            border: 1px solid #0056b3;
+        }
+
+        .person img {
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border: 2px solid #0056b3;
+        }
+
+        .fixed-info {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Style de la modale */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px); /* Flou en arrière-plan */
+        }
+        .modal-content {
+            position: relative;
+            margin: 10% auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            width: 90%; /* Adaptatif pour les petits écrans */
+            max-width: 600px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        /* Pagination Style */
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .pagination button:hover {
+            background-color: #003366;
+        }
+        .pagination button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Style des filtres */
+        .filters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        .filters input,
+        .filters select {
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 250px;
+            max-width: 100%;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .filters select:hover, .filters input:hover {
+            border-color: #0056b3;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #003366;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        footer a {
+            color: white;
+            text-decoration: none;
+        }
+
+        /* MEDIA QUERIES for mobile and tablet */
+        @media (max-width: 768px) {
+            .person {
+                width: 100%; /* La carte prend 100% de la largeur sur les petits écrans */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- En-tête avec le logo et les informations -->
+    <div class="header">
+        <img src="https://i.imgur.com/FGFMRD5.jpg" alt="M6 Logo">
+        <h1>DIRECTION DES TECHNOLOGIES DE L'INNOVATION</h1>
+        <p>Bienvenue au sein de la DTI.</p>
+    </div>
+
+    <!-- Champs de recherche et filtres -->
+    <div class="filters">
+        <input type="text" id="searchName" placeholder="🔍 Rechercher par nom">
+        <select id="filterDepartment">
+            <option value="">🛠️ Filtrer par Équipe</option>
+        </select>
+        <select id="filterPosition">
+            <option value="">📋 Filtrer par Poste</option>
+        </select>
+        <select id="filterInterest">
+            <option value="">⭐ Filtrer par Centres d'Intérêts</option>
+        </select>
+    </div>
+
+    <!-- Section pour afficher les collaborateurs -->
+    <div id="collaboratorCount" style="text-align: center; margin-top: 10px; font-size: 16px;"></div>
+    <div id="trombinoscope" class="trombinoscope"></div>
+    <div id="pagination" class="pagination"></div>
+
+    <!-- Modale pour afficher les détails supplémentaires -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modal-details"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2024 Direction des Technologies de l'Innovation - Tous droits réservés</p>
+        <p><a href="#">Mentions légales</a> | <a href="#">Contact</a></p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let allData = [];
+            const itemsPerPage = 20;
+            let currentPage = 1;
+
+            fetch('./collaborateurs.json')
+                .then(response => response.json())
+                .then(data => {
+                    allData = data;
+                    generatePositionsFilter(data);
+                    generateDepartmentsFilter(data);
+                    generateInterestsFilter(data); // Générer les options du filtre Centres d'Intérêts
+                    generateTrombinoscope(1, allData);
+                    updateCollaboratorCount(allData.length);
+                });
+
+            document.getElementById('searchName').addEventListener('input', filterPeople);
+            document.getElementById('filterDepartment').addEventListener('change', filterPeople);
+            document.getElementById('filterPosition').addEventListener('change', filterPeople);
+            document.getElementById('filterInterest').addEventListener('change', filterPeople);
+
+            function generatePositionsFilter(data) {
+                const filterPosition = document.getElementById('filterPosition');
+                const uniquePositions = new Set();
+                data.forEach(person => {
+                    if (person["poste"]) {
+                        uniquePositions.add(person["poste"]);
+                    }
+                });
+                uniquePositions.forEach(position => {
+                    const option = document.createElement('option');
+                    option.value = position;
+                    option.textContent = position;
+                    filterPosition.appendChild(option);
+                });
+            }
+
+            function generateDepartmentsFilter(data) {
+                const filterDepartment = document.getElementById('filterDepartment');
+                const uniqueDepartments = new Set();
+                data.forEach(person => {
+                    if (person["équipe"]) {
+                        uniqueDepartments.add(person["équipe"]);
+                    }
+                });
+                uniqueDepartments.forEach(department => {
+                    const option = document.createElement('option');
+                    option.value = department;
+                    option.textContent = department;
+                    filterDepartment.appendChild(option);
+                });
+            }
+
+            function generateInterestsFilter(data) {
+                const filterInterest = document.getElementById('filterInterest');
+                const uniqueInterests = new Set();
+                data.forEach(person => {
+                    if (person["Quels sont vos centres d'intérêts ?"]) {
+                        const interests = person["Quels sont vos centres d'intérêts ?"].split(', ');
+                        interests.forEach(interest => uniqueInterests.add(interest));
+                    }
+                });
+                uniqueInterests.forEach(interest => {
+                    const option = document.createElement('option');
+                    option.value = interest;
+                    option.textContent = interest;
+                    filterInterest.appendChild(option);
+                });
+            }
+
+            function filterPeople() {
+                const nameInput = document.getElementById('searchName').value.toLowerCase();
+                const departmentFilter = document.getElementById('filterDepartment').value.toLowerCase();
+                const positionFilter = document.getElementById('filterPosition').value.toLowerCase();
+                const interestFilter = document.getElementById('filterInterest').value.toLowerCase();
+
+                const filteredData = allData.filter(person => {
+                    const name = person["Nom et Prénom"].toLowerCase();
+                    const department = person["équipe"]?.toLowerCase() || '';
+                    const position = person["poste"]?.toLowerCase() || '';
+                    const interests = person["Quels sont vos centres d'intérêts ?"]?.toLowerCase() || '';
+
+                    return name.includes(nameInput) &&
+                        (department.includes(departmentFilter) || departmentFilter === "") &&
+                        (position.includes(positionFilter) || positionFilter === "") &&
+                        (interests.includes(interestFilter) || interestFilter === "");
+                });
+
+                generateTrombinoscope(1, filteredData);
+                updateCollaboratorCount(filteredData.length);
+            }
+
+            function generateTrombinoscope(page, data) {
+                const trombinoscope = document.getElementById('trombinoscope');
+                trombinoscope.innerHTML = '';
+                const start = (page - 1) * itemsPerPage;
+                const end = Math.min(start + itemsPerPage, data.length);
+
+                for (let i = start; i < end; i++) {
+                    const person = document.createElement('div');
+                    person.classList.add('person');
+                    const imageUrl = data[i]["Vous pouvez ajouter une photo pour personnaliser votre profil et permettre aux autres de mieux associer votre visage à votre nom."] || "https://via.placeholder.com/150";
+
+                    person.innerHTML = `
+                        <img src="${imageUrl}" alt="Photo de ${data[i]["Nom et Prénom"]}" onclick="openModal(${i})">
+                        <div class="fixed-info">
+                            <strong>Nom :</strong> ${data[i]["Nom et Prénom"]}<br>
+                            <strong class="job">Poste :</strong> ${data[i].poste || 'Non renseigné'}<br>
+                            <strong class="department">Équipe :</strong> ${data[i]["équipe"] || 'Non renseigné'}<br>
+                            <strong>Email :</strong> ${data[i]["Votre adresse mail"] || 'Non renseigné'}<br>
+                        </div>
+                    `;
+                    trombinoscope.appendChild(person);
+                }
+
+                generatePagination(data);
+            }
+
+            function generatePagination(data) {
+                const pagination = document.getElementById('pagination');
+                pagination.innerHTML = '';
+                const totalPages = Math.ceil(data.length / itemsPerPage);
+
+                for (let page = 1; page <= totalPages; page++) {
+                    const button = document.createElement('button');
+                    button.innerText = page;
+                    button.onclick = () => {
+                        currentPage = page;
+                        generateTrombinoscope(page, data);
+                    };
+                    if (page === currentPage) {
+                        button.style.fontWeight = 'bold';
+                    }
+                    pagination.appendChild(button);
+                }
+            }
+
+            function openModal(index) {
+                const modal = document.getElementById('modal');
+                const modalDetails = document.getElementById('modal-details');
+                const person = allData[index];
+
+                modalDetails.innerHTML = `
+                    <strong>Nom :</strong> ${person["Nom et Prénom"]}<br>
+                    <strong>Poste :</strong> ${person["poste"] || 'Non renseigné'}<br>
+                    <strong>Téléphone :</strong> ${person["Numéro de téléphone"] || 'Non renseigné'}<br>
+                    <strong>Équipe :</strong> ${person["équipe"] || 'Non renseigné'}<br>
+                    <strong>Statut professionnel :</strong> ${person["Statut professionnel"] || 'Non renseigné'}<br>
+                    <strong>Mail du supérieur hiérarchique :</strong> ${person["Le mail de votre supérieur hiérarchique"] || 'Non renseigné'}<br>
+                    <strong>Bâtiment :</strong> ${person["Bâtiment"] || 'Non renseigné'}<br>
+                    <strong>Étage :</strong> ${person["Etage"] || 'Non renseigné'}<br>
+                    <strong>Centres d'intérêts :</strong> ${person["Quels sont vos centres d'intérêts ?"] || 'Non renseigné'}<br>
+                    <strong>Profil LinkedIn :</strong> <a href="${person["Profil linkedin"] || '#'}" target="_blank">Voir le profil</a>
+                `;
+                modal.style.display = "block";
+            }
+
+            function closeModal() {
+                const modal = document.getElementById('modal');
+                modal.style.display = "none";
+            }
+
+            function updateCollaboratorCount(count) {
+                document.getElementById('collaboratorCount').textContent = `Collaborateurs affichés : ${count}`;
+            }
+        });
+    </script>
+
+</body>
+</html>
