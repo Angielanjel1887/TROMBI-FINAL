@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trombinoscope Dynamique</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: "Arial", sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f7f9fc;
             margin: 0;
             padding: 0;
+            color: #333;
         }
 
         /* Header Style */
@@ -19,14 +21,16 @@
             color: white;
             text-align: center;
             position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         .header img {
-            max-width: 150px;
+            max-width: 100px;
             display: block;
             margin: 0 auto;
         }
         .header h1 {
-            margin-top: 20px;
+            margin-top: 10px;
+            font-size: 24px;
         }
 
         /* Flexbox for cards */
@@ -42,19 +46,21 @@
         .person {
             background-color: #fff;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
             padding: 20px;
             width: 250px; /* Taille des cartes */
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transition pour l'effet */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #eee;
         }
 
         /* Hover effect */
         .person:hover {
-            transform: scale(1.05); /* Agrandir légèrement la carte */
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Ajouter une ombre plus prononcée */
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border: 1px solid #0056b3;
         }
 
         .person img {
@@ -62,12 +68,14 @@
             width: 120px;
             height: 120px;
             object-fit: cover;
-            border: 2px solid #003366;
+            border: 2px solid #0056b3;
         }
 
         .fixed-info {
             margin-top: 15px;
             text-align: center;
+            font-size: 14px;
+            color: #555;
         }
 
         /* Style de la modale */
@@ -89,6 +97,7 @@
             border-radius: 10px;
             width: 90%; /* Adaptatif pour les petits écrans */
             max-width: 600px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
         .close {
             position: absolute;
@@ -97,9 +106,28 @@
             font-size: 28px;
             cursor: pointer;
         }
+
+        /* Pagination Style */
         .pagination {
             text-align: center;
             margin-top: 20px;
+        }
+        .pagination button {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .pagination button:hover {
+            background-color: #003366;
+        }
+        .pagination button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
 
         /* Style des filtres */
@@ -113,11 +141,17 @@
         }
         .filters input,
         .filters select {
-            padding: 10px;
+            padding: 12px;
             border-radius: 5px;
-            border: 2px solid #003366;
+            border: 1px solid #ccc;
             width: 250px;
             max-width: 100%;
+            font-size: 14px;
+        }
+        .filters select {
+            background: url('https://cdn-icons-png.flaticon.com/512/892/892338.png') no-repeat right;
+            background-size: 16px;
+            padding-right: 30px;
         }
 
         /* MEDIA QUERIES for mobile and tablet */
@@ -135,21 +169,19 @@
         <img src="https://i.imgur.com/FGFMRD5.jpg" alt="M6 Logo">
         <h1>DIRECTION DES TECHNOLOGIES DE L'INNOVATION</h1>
         <p>Bienvenue au sein de la DTI.</p>
-        <div style="margin-top: 10px;">
-        </div>
     </div>
 
     <!-- Champs de recherche et filtres -->
     <div class="filters">
-        <input type="text" id="searchName" placeholder="Rechercher par nom">
+        <input type="text" id="searchName" placeholder="🔍 Rechercher par nom">
         <select id="filterDepartment">
-            <option value="">-- Filtrer par Équipe --</option>
+            <option value="">🛠️ Filtrer par Équipe</option>
         </select>
         <select id="filterPosition">
-            <option value="">-- Filtrer par Poste --</option>
+            <option value="">📋 Filtrer par Poste</option>
         </select>
         <select id="filterInterest">
-            <option value="">-- Filtrer par Centres d'Intérêts --</option>
+            <option value="">⭐ Filtrer par Centres d'Intérêts</option>
         </select>
     </div>
 
