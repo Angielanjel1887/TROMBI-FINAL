@@ -334,7 +334,7 @@
                     const imageUrl = data[i]["Vous pouvez ajouter une photo pour personnaliser votre profil et permettre aux autres de mieux associer votre visage à votre nom."] || "https://via.placeholder.com/150";
 
                     person.innerHTML = `
-                        <img src="${imageUrl}" alt="Photo de ${data[i]["Nom et Prénom"]}" onclick="openModal(${i})">
+                        <img src="${imageUrl}" alt="Photo de ${data[i]["Nom et Prénom"]}" class="open-modal" data-index="${i}">
                         <div class="fixed-info">
                             <strong>Nom :</strong> ${data[i]["Nom et Prénom"]}<br>
                             <strong class="job">Poste :</strong> ${data[i].poste || 'Non renseigné'}<br>
@@ -346,6 +346,13 @@
                 }
 
                 generatePagination(data);
+
+                // Attache l'événement de la modale
+                document.querySelectorAll('.open-modal').forEach(img => {
+                    img.addEventListener('click', function() {
+                        openModal(img.getAttribute('data-index'));
+                    });
+                });
             }
 
             function generatePagination(data) {
@@ -367,7 +374,8 @@
                 }
             }
 
-            function openModal(index) {
+            // Rendre accessible openModal au global
+            window.openModal = function(index) {
                 const modal = document.getElementById('modal');
                 const modalDetails = document.getElementById('modal-details');
                 const person = allData[index];
@@ -387,7 +395,7 @@
                 modal.style.display = "block";
             }
 
-            function closeModal() {
+            window.closeModal = function() {
                 const modal = document.getElementById('modal');
                 modal.style.display = "none";
             }
