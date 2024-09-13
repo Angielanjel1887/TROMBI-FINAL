@@ -6,12 +6,12 @@ let currentPage = 1;
 fetch('collaborateurs.json')
     .then(response => response.json())
     .then(data => {
+        console.log(data);  // Affiche les données récupérées dans la console
         allData = data;  // Stocker les données
         generatePositionsFilter(data); // Générer les options du filtre Poste dynamiquement
         generateDepartmentsFilter(data); // Générer les options du filtre Équipe dynamiquement
         generateTrombinoscope(1, allData); // Générer le trombinoscope avec toutes les données
     });
-
 document.getElementById('searchName').addEventListener('input', filterPeople);
 document.getElementById('filterDepartment').addEventListener('change', filterPeople);
 document.getElementById('filterPosition').addEventListener('change', filterPeople);
