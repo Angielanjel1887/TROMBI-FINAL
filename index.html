@@ -251,11 +251,9 @@
             const person = data[index];
 
             modalDetails.innerHTML = `
-                <strong>Nom :</strong> ${person["Nom et Prénom"]}<br>
-                <strong>Poste :</strong> ${person["poste"] || 'Non renseigné'}<br>
-                <strong>Email :</strong> ${person["Votre adresse mail"] || 'Non renseigné'}<br>
+    
                 <strong>Téléphone :</strong> ${person["Numéro de téléphone"] || 'Non renseigné'}<br>
-                <strong>Département ou équipe :</strong> ${person["Département ou équipe"] || 'Non renseigné'}<br>
+                <strong>équipe :</strong> ${person["Département ou équipe"] || 'Non renseigné'}<br>
                 <strong>Statut professionnel :</strong> ${person["Statut professionnel"] || 'Non renseigné'}<br>
                 <strong>Mail supérieur hiérarchique :</strong> ${person["Le mail de votre supérieur hiérarchique"] || 'Non renseigné'}<br>
                 <strong>Bâtiment :</strong> ${person["Bâtiment"] || 'Non renseigné'}<br>
