@@ -157,16 +157,17 @@
     </div>
 
     <script>
+        let allData = []; // Stocker toutes les données pour les filtres
+        const itemsPerPage = 20;
+        let currentPage = 1;
+
         // Charger le fichier JSON via fetch
         fetch('collaborateurs.json')
             .then(response => response.json())
             .then(data => {
-                generateTrombinoscope(1, data); // Passer les données JSON à la fonction
+                allData = data;  // Stocker les données
+                generateTrombinoscope(1, allData); // Passer les données JSON à la fonction
             });
-
-        const itemsPerPage = 20;
-        let currentPage = 1;
-        let allData = []; // Stocker toutes les données pour les filtres
 
         document.getElementById('searchName').addEventListener('input', filterPeople);
         document.getElementById('filterDepartment').addEventListener('change', filterPeople);
@@ -174,7 +175,6 @@
         document.getElementById('filterInterest').addEventListener('change', filterPeople);
 
         function generateTrombinoscope(page, data) {
-            allData = data;  // Stocker les données
             const trombinoscope = document.getElementById('trombinoscope');
             trombinoscope.innerHTML = '';  
             const start = (page - 1) * itemsPerPage;
@@ -183,6 +183,8 @@
             for (let i = start; i < end; i++) {
                 const person = document.createElement('div');
                 person.classList.add('person');
+                
+                // Assurez-vous que la photo existe, sinon utilisez une photo par défaut
                 const imageUrl = data[i]["photo"] || "https://via.placeholder.com/150";
                 
                 person.innerHTML = `
