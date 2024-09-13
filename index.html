@@ -252,53 +252,66 @@
             document.getElementById('filterInterest').addEventListener('change', filterPeople);
 
             function generatePositionsFilter(data) {
-                const filterPosition = document.getElementById('filterPosition');
-                const uniquePositions = new Set();
-                data.forEach(person => {
-                    if (person["poste"]) {
-                        uniquePositions.add(person["poste"]);
-                    }
-                });
-                uniquePositions.forEach(position => {
-                    const option = document.createElement('option');
-                    option.value = position;
-                    option.textContent = position;
-                    filterPosition.appendChild(option);
-                });
-            }
+    const filterPosition = document.getElementById('filterPosition');
+    const uniquePositions = new Set();
 
-            function generateDepartmentsFilter(data) {
-                const filterDepartment = document.getElementById('filterDepartment');
-                const uniqueDepartments = new Set();
-                data.forEach(person => {
-                    if (person["équipe"]) {
-                        uniqueDepartments.add(person["équipe"]);
-                    }
-                });
-                uniqueDepartments.forEach(department => {
-                    const option = document.createElement('option');
-                    option.value = department;
-                    option.textContent = department;
-                    filterDepartment.appendChild(option);
-                });
-            }
+    data.forEach(person => {
+        if (person["poste"]) {
+            uniquePositions.add(person["poste"]);
+        }
+    });
+
+    // Convertir le Set en Array et trier en ordre alphabétique
+    Array.from(uniquePositions).sort().forEach(position => {
+        const option = document.createElement('option');
+        option.value = position;
+        option.textContent = position;
+        filterPosition.appendChild(option);
+    });
+}
+
+     function generateEquipeFilter(data) {
+    const filterEquipe = document.getElementById('filterequipe');
+    const uniqueEquipe = new Set();
+
+    // Vérification de la clé "équipe" dans le JSON
+    data.forEach(person => {
+        if (person["équipe"]) {
+            uniqueEquipe.add(person["équipe"]);
+        }
+    });
+
+    // Convertir le Set en Array et trier en ordre alphabétique
+    Array.from(uniqueEquipe).sort().forEach(equipe => {
+        const option = document.createElement('option');
+        option.value = equipe;
+        option.textContent = equipe;
+        filterEquipe.appendChild(option);
+    });
+}
+}
+
 
             function generateInterestsFilter(data) {
-                const filterInterest = document.getElementById('filterInterest');
-                const uniqueInterests = new Set();
-                data.forEach(person => {
-                    if (person["Quels sont vos centres d'intérêts ?"]) {
-                        const interests = person["Quels sont vos centres d'intérêts ?"].split(', ');
-                        interests.forEach(interest => uniqueInterests.add(interest));
-                    }
-                });
-                uniqueInterests.forEach(interest => {
-                    const option = document.createElement('option');
-                    option.value = interest;
-                    option.textContent = interest;
-                    filterInterest.appendChild(option);
-                });
-            }
+    const filterInterest = document.getElementById('filterInterest');
+    const uniqueInterests = new Set();
+
+    data.forEach(person => {
+        if (person["Quels sont vos centres d'intérêts ?"]) {
+            const interests = person["Quels sont vos centres d'intérêts ?"].split(', ');
+            interests.forEach(interest => uniqueInterests.add(interest));
+        }
+    });
+
+    // Convertir le Set en Array et trier en ordre alphabétique
+    Array.from(uniqueInterests).sort().forEach(interest => {
+        const option = document.createElement('option');
+        option.value = interest;
+        option.textContent = interest;
+        filterInterest.appendChild(option);
+    });
+}
+
 
             function filterPeople() {
                 const nameInput = document.getElementById('searchName').value.toLowerCase();
