@@ -62,8 +62,8 @@
                 .then(data => {
                     allData = data;
                     generatePositionsFilter(data);
-                    generateDepartmentsFilter(data);
-                    generateInterestsFilter(data); // Générer les options du filtre Centres d'Intérêts
+                    generateDepartmentsFilter(data);  // Appelle la fonction manquante ici
+                    generateInterestsFilter(data);    // Générer les options du filtre Centres d'Intérêts
                     generateTrombinoscope(1, allData);
                     updateCollaboratorCount(allData.length);
                 });
@@ -73,24 +73,23 @@
             document.getElementById('filterPosition').addEventListener('change', filterPeople);
             document.getElementById('filterInterest').addEventListener('change', filterPeople);
 
-            // Correction de la fonction generateEquipeFilter
-            function generateEquipeFilter(data) {
-                const filterEquipe = document.getElementById('filterDepartment'); // ID corrigé ici
-                const uniqueEquipe = new Set();
+            // Ajout de la fonction manquante `generateDepartmentsFilter`
+            function generateDepartmentsFilter(data) {
+                const filterDepartment = document.getElementById('filterDepartment');
+                const uniqueDepartments = new Set();
 
-                // Vérification de la clé "équipe" dans le JSON
                 data.forEach(person => {
                     if (person["équipe"]) {
-                        uniqueEquipe.add(person["équipe"]);
+                        uniqueDepartments.add(person["équipe"]);
                     }
                 });
 
                 // Convertir le Set en Array et trier en ordre alphabétique
-                Array.from(uniqueEquipe).sort().forEach(equipe => {
+                Array.from(uniqueDepartments).sort().forEach(department => {
                     const option = document.createElement('option');
-                    option.value = equipe;
-                    option.textContent = equipe;
-                    filterEquipe.appendChild(option);
+                    option.value = department;
+                    option.textContent = department;
+                    filterDepartment.appendChild(option);
                 });
             }
 
