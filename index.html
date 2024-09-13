@@ -6,185 +6,7 @@
     <title>Trombinoscope Dynamique</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f7f9fc;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
-
-        /* Header Style */
-        .header {
-            padding: 20px;
-            background-color: #003366;
-            color: white;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .header img {
-            max-width: 100px;
-            display: block;
-            margin: 0 auto;
-        }
-        .header h1 {
-            margin-top: 10px;
-            font-size: 24px;
-        }
-
-        /* Flexbox for cards */
-        .trombinoscope {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
-        }
-
-        /* Style for each person card */
-        .person {
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-            padding: 20px;
-            width: 250px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid #eee;
-            animation: fadeInUp 0.6s ease-in-out;
-        }
-
-        /* Hover effect */
-        .person:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 16px rgba(0, 123, 255, 0.5), 0 0 10px rgba(0, 123, 255, 0.3);
-            border: 1px solid #0056b3;
-        }
-
-        .person img {
-            border-radius: 50%;
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-            border: 2px solid #0056b3;
-        }
-
-        .fixed-info {
-            margin-top: 15px;
-            text-align: center;
-            font-size: 14px;
-            color: #555;
-        }
-
-        /* Animation for cards */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Style de la modale */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px); /* Flou en arrière-plan */
-        }
-        .modal-content {
-            position: relative;
-            margin: 10% auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            width: 90%; /* Adaptatif pour les petits écrans */
-            max-width: 600px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-        .close {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            font-size: 28px;
-            cursor: pointer;
-        }
-
-        /* Pagination Style */
-        .pagination {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .pagination button {
-            background-color: #0056b3;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            margin: 5px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .pagination button:hover {
-            background-color: #003366;
-        }
-        .pagination button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        /* Style des filtres */
-        .filters {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-            padding: 20px;
-        }
-        .filters input,
-        .filters select {
-            padding: 12px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            width: 250px;
-            max-width: 100%;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        .filters select:hover, .filters input:hover {
-            border-color: #0056b3;
-        }
-
-        /* Footer */
-        footer {
-            background-color: #003366;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        footer a {
-            color: white;
-            text-decoration: none;
-        }
-
-        /* MEDIA QUERIES for mobile and tablet */
-        @media (max-width: 768px) {
-            .person {
-                width: 100%; /* La carte prend 100% de la largeur sur les petits écrans */
-            }
-        }
+        /* Styles généraux ici */
     </style>
 </head>
 <body>
@@ -251,67 +73,65 @@
             document.getElementById('filterPosition').addEventListener('change', filterPeople);
             document.getElementById('filterInterest').addEventListener('change', filterPeople);
 
+            // Correction de la fonction generateEquipeFilter
+            function generateEquipeFilter(data) {
+                const filterEquipe = document.getElementById('filterDepartment'); // ID corrigé ici
+                const uniqueEquipe = new Set();
+
+                // Vérification de la clé "équipe" dans le JSON
+                data.forEach(person => {
+                    if (person["équipe"]) {
+                        uniqueEquipe.add(person["équipe"]);
+                    }
+                });
+
+                // Convertir le Set en Array et trier en ordre alphabétique
+                Array.from(uniqueEquipe).sort().forEach(equipe => {
+                    const option = document.createElement('option');
+                    option.value = equipe;
+                    option.textContent = equipe;
+                    filterEquipe.appendChild(option);
+                });
+            }
+
             function generatePositionsFilter(data) {
-    const filterPosition = document.getElementById('filterPosition');
-    const uniquePositions = new Set();
+                const filterPosition = document.getElementById('filterPosition');
+                const uniquePositions = new Set();
 
-    data.forEach(person => {
-        if (person["poste"]) {
-            uniquePositions.add(person["poste"]);
-        }
-    });
+                data.forEach(person => {
+                    if (person["poste"]) {
+                        uniquePositions.add(person["poste"]);
+                    }
+                });
 
-    // Convertir le Set en Array et trier en ordre alphabétique
-    Array.from(uniquePositions).sort().forEach(position => {
-        const option = document.createElement('option');
-        option.value = position;
-        option.textContent = position;
-        filterPosition.appendChild(option);
-    });
-}
-
-     function generateEquipeFilter(data) {
-    const filterEquipe = document.getElementById('filterequipe');
-    const uniqueEquipe = new Set();
-
-    // Vérification de la clé "équipe" dans le JSON
-    data.forEach(person => {
-        if (person["équipe"]) {
-            uniqueEquipe.add(person["équipe"]);
-        }
-    });
-
-    // Convertir le Set en Array et trier en ordre alphabétique
-    Array.from(uniqueEquipe).sort().forEach(equipe => {
-        const option = document.createElement('option');
-        option.value = equipe;
-        option.textContent = equipe;
-        filterEquipe.appendChild(option);
-    });
-}
-}
-
+                // Convertir le Set en Array et trier en ordre alphabétique
+                Array.from(uniquePositions).sort().forEach(position => {
+                    const option = document.createElement('option');
+                    option.value = position;
+                    option.textContent = position;
+                    filterPosition.appendChild(option);
+                });
+            }
 
             function generateInterestsFilter(data) {
-    const filterInterest = document.getElementById('filterInterest');
-    const uniqueInterests = new Set();
+                const filterInterest = document.getElementById('filterInterest');
+                const uniqueInterests = new Set();
 
-    data.forEach(person => {
-        if (person["Quels sont vos centres d'intérêts ?"]) {
-            const interests = person["Quels sont vos centres d'intérêts ?"].split(', ');
-            interests.forEach(interest => uniqueInterests.add(interest));
-        }
-    });
+                data.forEach(person => {
+                    if (person["Quels sont vos centres d'intérêts ?"]) {
+                        const interests = person["Quels sont vos centres d'intérêts ?"].split(', ');
+                        interests.forEach(interest => uniqueInterests.add(interest));
+                    }
+                });
 
-    // Convertir le Set en Array et trier en ordre alphabétique
-    Array.from(uniqueInterests).sort().forEach(interest => {
-        const option = document.createElement('option');
-        option.value = interest;
-        option.textContent = interest;
-        filterInterest.appendChild(option);
-    });
-}
-
+                // Convertir le Set en Array et trier en ordre alphabétique
+                Array.from(uniqueInterests).sort().forEach(interest => {
+                    const option = document.createElement('option');
+                    option.value = interest;
+                    option.textContent = interest;
+                    filterInterest.appendChild(option);
+                });
+            }
 
             function filterPeople() {
                 const nameInput = document.getElementById('searchName').value.toLowerCase();
