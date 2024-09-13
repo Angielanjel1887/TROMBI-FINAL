@@ -166,6 +166,7 @@
 
         const itemsPerPage = 20;
         let currentPage = 1;
+        let allData = []; // Stocker toutes les données pour les filtres
 
         document.getElementById('searchName').addEventListener('input', filterPeople);
         document.getElementById('filterDepartment').addEventListener('change', filterPeople);
@@ -173,6 +174,7 @@
         document.getElementById('filterInterest').addEventListener('change', filterPeople);
 
         function generateTrombinoscope(page, data) {
+            allData = data;  // Stocker les données
             const trombinoscope = document.getElementById('trombinoscope');
             trombinoscope.innerHTML = '';  
             const start = (page - 1) * itemsPerPage;
@@ -181,16 +183,15 @@
             for (let i = start; i < end; i++) {
                 const person = document.createElement('div');
                 person.classList.add('person');
-                const imageUrl = data[i]["Vous pouvez ajouter une photo pour personnaliser votre profil et permettre aux autres de mieux associer votre visage à votre nom."] || "https://via.placeholder.com/150";
+                const imageUrl = data[i]["photo"] || "https://via.placeholder.com/150";
                 
                 person.innerHTML = `
                     <img src="${imageUrl}" alt="Photo de ${data[i]["Nom et Prénom"]}">
                     <div class="fixed-info">
                         <strong>Nom :</strong> ${data[i]["Nom et Prénom"]}<br>
-                        <strong class="job">Poste :</strong> ${data[i].poste}<br>
-                        <strong class="department">Département :</strong> ${data[i]["Département ou équipe"]}<br>
-                        <strong class="interests">Centres d'intérêts :</strong> ${data[i]["Quels sont vos centres d'intérêts ?"]}<br>
-                        <strong>Email :</strong> ${data[i]["Votre adresse mail"]}<br>
+                        <strong class="job">Poste :</strong> ${data[i].poste || 'Non renseigné'}<br>
+                        <strong class="department">Équipe :</strong> ${data[i]["Département ou équipe"] || 'Non renseigné'}<br>
+                        <strong>Email :</strong> ${data[i]["Votre adresse mail"] || 'Non renseigné'}<br>
                     </div>
                 `;
                 person.querySelector('img').addEventListener('click', function() {
@@ -220,31 +221,26 @@
                 pagination.appendChild(button);
             }
         }
+
         function filterPeople() {
             const nameInput = document.getElementById('searchName').value.toLowerCase();
             const departmentFilter = document.getElementById('filterDepartment').value.toLowerCase();
             const positionFilter = document.getElementById('filterPosition').value.toLowerCase();
             const interestFilter = document.getElementById('filterInterest').value.toLowerCase();
 
-            const people = document.getElementsByClassName('person');
+            const filteredData = allData.filter(person => {
+                const name = person["Nom et Prénom"].toLowerCase();
+                const department = person["Département ou équipe"]?.toLowerCase() || '';
+                const position = person["poste"]?.toLowerCase() || '';
+                const interests = person["Quels sont vos centres d'intérêts ?"]?.toLowerCase() || '';
 
-            for (let i = 0; i < people.length; i++) {
-                const name = people[i].getElementsByClassName('fixed-info')[0].textContent.toLowerCase();
-                const department = people[i].getElementsByClassName('department')[0].textContent.toLowerCase();
-                const position = people[i].getElementsByClassName('job')[0].textContent.toLowerCase();
-                const interests = people[i].getElementsByClassName('interests')[0].textContent.toLowerCase();
+                return name.includes(nameInput) &&
+                    (department.includes(departmentFilter) || departmentFilter === "") &&
+                    (position.includes(positionFilter) || positionFilter === "") &&
+                    (interests.includes(interestFilter) || interestFilter === "");
+            });
 
-                const matchesName = name.includes(nameInput);
-                const matchesDepartment = department.includes(departmentFilter) || departmentFilter === "";
-                const matchesPosition = position.includes(positionFilter) || positionFilter === "";
-                const matchesInterests = interests.includes(interestFilter) || interestFilter === "";
-
-                if (matchesName && matchesDepartment && matchesPosition && matchesInterests) {
-                    people[i].style.display = "";
-                } else {
-                    people[i].style.display = "none";
-                }
-            }
+            generateTrombinoscope(1, filteredData);
         }
 
         function openModal(index, data) {
@@ -255,16 +251,15 @@
             modalDetails.innerHTML = `
                 <strong>Nom :</strong> ${person["Nom et Prénom"]}<br>
                 <strong>Poste :</strong> ${person["poste"] || 'Non renseigné'}<br>
-                <strong>Email :</strong> ${person["Votre adresse mail"]}<br>
+                <strong>Email :</strong> ${person["Votre adresse mail"] || 'Non renseigné'}<br>
                 <strong>Téléphone :</strong> ${person["Numéro de téléphone"] || 'Non renseigné'}<br>
                 <strong>Département ou équipe :</strong> ${person["Département ou équipe"] || 'Non renseigné'}<br>
                 <strong>Statut professionnel :</strong> ${person["Statut professionnel"] || 'Non renseigné'}<br>
-                <strong>Décrivez en 1 à 10 lignes votre métier :</strong> ${person["Décrivez en 1 à 10 lignes votre métier"] || 'Non renseigné'}<br>
-                <strong>Le mail de votre supérieur hiérarchique :</strong> ${person["Le mail de votre supérieur hiérarchique"] || 'Non renseigné'}<br>
+                <strong>Mail supérieur hiérarchique :</strong> ${person["Le mail de votre supérieur hiérarchique"] || 'Non renseigné'}<br>
                 <strong>Bâtiment :</strong> ${person["Bâtiment"] || 'Non renseigné'}<br>
                 <strong>Étage :</strong> ${person["Etage"] || 'Non renseigné'}<br>
                 <strong>Centres d'intérêts :</strong> ${person["Quels sont vos centres d'intérêts ?"] || 'Non renseigné'}<br>
-                <strong>Quelle compétence ou activité aimeriez-vous apprendre ? :</strong> ${person["Quelle compétence ou activité aimeriez-vous apprendre ?"] || 'Non renseigné'}<br>
+                <strong>Compétence à apprendre :</strong> ${person["Quelle compétence ou activité aimeriez-vous apprendre ?"] || 'Non renseigné'}<br>
                 <strong>LinkedIn :</strong> <a href="${person["Profil linkedin"] || '#'}" target="_blank">Voir le profil</a><br>
             `;
             modal.style.display = "block";
