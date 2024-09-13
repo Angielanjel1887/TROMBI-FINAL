@@ -14,11 +14,13 @@
             updateCollaboratorCount(allData.length); // Initialiser le compteur de collaborateurs
         });
 
+    // Événements pour filtrer
     document.getElementById('searchName').addEventListener('input', filterPeople);
     document.getElementById('filterDepartment').addEventListener('change', filterPeople);
     document.getElementById('filterPosition').addEventListener('change', filterPeople);
     document.getElementById('filterInterest').addEventListener('change', filterPeople);
 
+    // Générer les options des filtres
     function generatePositionsFilter(data) {
         const filterPosition = document.getElementById('filterPosition');
         const uniquePositions = new Set();
@@ -68,6 +70,7 @@
         });
     }
 
+    // Filtrer les personnes
     function filterPeople() {
         const nameInput = document.getElementById('searchName').value.toLowerCase();
         const departmentFilter = document.getElementById('filterDepartment').value.toLowerCase();
@@ -90,6 +93,22 @@
         updateCollaboratorCount(filteredData.length); // Mettre à jour le compteur après filtrage
     }
 
+    // Mettre à jour le compteur de collaborateurs
+    function updateCollaboratorCount(count) {
+        const countElement = document.getElementById('collaboratorCount');
+        if (!countElement) {
+            const newCountElement = document.createElement('p');
+            newCountElement.id = 'collaboratorCount';
+            newCountElement.style.textAlign = 'center';
+            newCountElement.style.marginTop = '10px';
+            newCountElement.style.fontSize = '16px';
+            document.body.insertBefore(newCountElement, document.getElementById('trombinoscope'));
+        }
+        // Mettre à jour le texte du compteur
+        document.getElementById('collaboratorCount').textContent = `Collaborateurs affichés : ${count}`;
+    }
+
+    // Générer le trombinoscope
     function generateTrombinoscope(page, data) {
         const trombinoscope = document.getElementById('trombinoscope');
         trombinoscope.innerHTML = '';
@@ -116,6 +135,7 @@
         generatePagination(data);
     }
 
+    // Pagination
     function generatePagination(data) {
         const pagination = document.getElementById('pagination');
         pagination.innerHTML = '';
@@ -135,6 +155,7 @@
         }
     }
 
+    // Ouvrir la modale
     function openModal(index) {
         const modal = document.getElementById('modal');
         const modalDetails = document.getElementById('modal-details');
@@ -155,6 +176,7 @@
         modal.style.display = "block";
     }
 
+    // Fermer la modale
     function closeModal() {
         const modal = document.getElementById('modal');
         modal.style.display = "none";
