@@ -1,130 +1,162 @@
-let allData = []; // Stocker toutes les données JSON
-const itemsPerPage = 20;
-let currentPage = 1;
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trombinoscope Dynamique</title>
+</head>
+<body>
 
-// Charger le fichier JSON via fetch
-fetch('collaborateurs.json')
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);  // Affiche les données récupérées dans la console
-        allData = data;  // Stocker les données
-        generatePositionsFilter(data); // Générer les options du filtre Poste dynamiquement
-        generateDepartmentsFilter(data); // Générer les options du filtre Équipe dynamiquement
-        generateTrombinoscope(1, allData); // Générer le trombinoscope avec toutes les données
-    });
-document.getElementById('searchName').addEventListener('input', filterPeople);
-document.getElementById('filterDepartment').addEventListener('change', filterPeople);
-document.getElementById('filterPosition').addEventListener('change', filterPeople);
-document.getElementById('filterInterest').addEventListener('change', filterPeople);
+    <!-- Champs de recherche et filtres -->
+    <input type="text" id="searchName" placeholder="Rechercher par nom">
+    <select id="filterDepartment">
+        <option value="">-- Filtrer par Équipe --</option>
+    </select>
+    <select id="filterPosition">
+        <option value="">-- Filtrer par Poste --</option>
+    </select>
+    <select id="filterInterest">
+        <option value="">-- Filtrer par Centres d'Intérêts --</option>
+    </select>
 
-// Fonction pour générer dynamiquement les options du filtre de postes
-function generatePositionsFilter(data) {
-    const filterPosition = document.getElementById('filterPosition');
-    const uniquePositions = new Set(); // Utiliser un Set pour avoir des valeurs uniques
+    <!-- Section pour afficher les collaborateurs -->
+    <div id="trombinoscope"></div>
+    <div id="pagination"></div>
 
-    // Parcourir les données pour extraire les postes
-    data.forEach(person => {
-        if (person["poste"]) { // Vérifier si un poste est bien défini
-            uniquePositions.add(person["poste"]);
+    <!-- Le code JavaScript encapsulé -->
+    <script>
+        let allData = []; // Stocker toutes les données JSON
+        const itemsPerPage = 20;
+        let currentPage = 1;
+
+        // Charger le fichier JSON via fetch
+        fetch('./collaborateurs.json')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);  // Affiche les données récupérées dans la console
+                allData = data;  // Stocker les données
+                generatePositionsFilter(data); // Générer les options du filtre Poste dynamiquement
+                generateDepartmentsFilter(data); // Générer les options du filtre Équipe dynamiquement
+                generateTrombinoscope(1, allData); // Générer le trombinoscope avec toutes les données
+            });
+
+        document.getElementById('searchName').addEventListener('input', filterPeople);
+        document.getElementById('filterDepartment').addEventListener('change', filterPeople);
+        document.getElementById('filterPosition').addEventListener('change', filterPeople);
+        document.getElementById('filterInterest').addEventListener('change', filterPeople);
+
+        // Fonction pour générer dynamiquement les options du filtre de postes
+        function generatePositionsFilter(data) {
+            const filterPosition = document.getElementById('filterPosition');
+            const uniquePositions = new Set(); // Utiliser un Set pour avoir des valeurs uniques
+
+            // Parcourir les données pour extraire les postes
+            data.forEach(person => {
+                if (person["poste"]) { // Vérifier si un poste est bien défini
+                    uniquePositions.add(person["poste"]);
+                }
+            });
+
+            // Générer les options du filtre poste
+            uniquePositions.forEach(position => {
+                const option = document.createElement('option');
+                option.value = position;
+                option.textContent = position;
+                filterPosition.appendChild(option); // Ajouter l'option au filtre
+            });
         }
-    });
 
-    // Générer les options du filtre poste
-    uniquePositions.forEach(position => {
-        const option = document.createElement('option');
-        option.value = position;
-        option.textContent = position;
-        filterPosition.appendChild(option); // Ajouter l'option au filtre
-    });
-}
+        // Fonction pour générer dynamiquement les options du filtre des équipes
+        function generateDepartmentsFilter(data) {
+            const filterDepartment = document.getElementById('filterDepartment');
+            const uniqueDepartments = new Set(); // Utiliser un Set pour des équipes uniques
 
-// Fonction pour générer dynamiquement les options du filtre des équipes
-function generateDepartmentsFilter(data) {
-    const filterDepartment = document.getElementById('filterDepartment');
-    const uniqueDepartments = new Set(); // Utiliser un Set pour des équipes uniques
+            // Parcourir les données pour extraire les équipes
+            data.forEach(person => {
+                if (person["équipe"]) {
+                    uniqueDepartments.add(person["équipe"]);
+                }
+            });
 
-    // Parcourir les données pour extraire les équipes
-    data.forEach(person => {
-        if (person["équipe"]) { // Vérifier si l'équipe est bien définie
-            uniqueDepartments.add(person["équipe"]);
+            // Générer les options du filtre équipe
+            uniqueDepartments.forEach(department => {
+                const option = document.createElement('option');
+                option.value = department;
+                option.textContent = department;
+                filterDepartment.appendChild(option); // Ajouter l'option au filtre
+            });
         }
-    });
 
-    // Générer les options du filtre équipe
-    uniqueDepartments.forEach(department => {
-        const option = document.createElement('option');
-        option.value = department;
-        option.textContent = department;
-        filterDepartment.appendChild(option); // Ajouter l'option au filtre
-    });
-}
+        // Fonction pour filtrer les personnes en fonction des critères
+        function filterPeople() {
+            const nameInput = document.getElementById('searchName').value.toLowerCase();
+            const departmentFilter = document.getElementById('filterDepartment').value.toLowerCase();
+            const positionFilter = document.getElementById('filterPosition').value.toLowerCase();
+            const interestFilter = document.getElementById('filterInterest').value.toLowerCase();
 
-// Fonction pour filtrer les personnes en fonction des critères
-function filterPeople() {
-    const nameInput = document.getElementById('searchName').value.toLowerCase();
-    const departmentFilter = document.getElementById('filterDepartment').value.toLowerCase();
-    const positionFilter = document.getElementById('filterPosition').value.toLowerCase();
-    const interestFilter = document.getElementById('filterInterest').value.toLowerCase();
+            // Filtrer les données
+            const filteredData = allData.filter(person => {
+                const name = person["Nom et Prénom"].toLowerCase();
+                const department = person["équipe"]?.toLowerCase() || '';
+                const position = person["poste"]?.toLowerCase() || '';
+                const interests = person["Quels sont vos centres d'intérêts ?"]?.toLowerCase() || '';
 
-    // Filtrer les données
-    const filteredData = allData.filter(person => {
-        const name = person["Nom et Prénom"].toLowerCase();
-        const department = person["équipe"]?.toLowerCase() || '';  // Remarque : on filtre par "équipe"
-        const position = person["poste"]?.toLowerCase() || '';
-        const interests = person["Quels sont vos centres d'intérêts ?"]?.toLowerCase() || '';
+                // Vérification si chaque filtre correspond
+                return name.includes(nameInput) &&
+                    (department.includes(departmentFilter) || departmentFilter === "") &&
+                    (position.includes(positionFilter) || positionFilter === "") &&
+                    (interests.includes(interestFilter) || interestFilter === "");
+            });
 
-        // Vérification si chaque filtre correspond
-        return name.includes(nameInput) &&
-            (department.includes(departmentFilter) || departmentFilter === "") &&
-            (position.includes(positionFilter) || positionFilter === "") &&
-            (interests.includes(interestFilter) || interestFilter === "");
-    });
-
-    // Générer à nouveau le trombinoscope avec les données filtrées
-    generateTrombinoscope(1, filteredData);
-}
-
-function generateTrombinoscope(page, data) {
-    const trombinoscope = document.getElementById('trombinoscope');
-    trombinoscope.innerHTML = '';  
-    const start = (page - 1) * itemsPerPage;
-    const end = Math.min(start + itemsPerPage, data.length);
-
-    for (let i = start; i < end; i++) {
-        const person = document.createElement('div');
-        person.classList.add('person');
-        const imageUrl = data[i]["Vous pouvez ajouter une photo pour personnaliser votre profil et permettre aux autres de mieux associer votre visage à votre nom."] || "https://via.placeholder.com/150";
-        
-        person.innerHTML = `
-            <img src="${imageUrl}" alt="Photo de ${data[i]["Nom et Prénom"]}">
-            <div class="fixed-info">
-                <strong>Nom :</strong> ${data[i]["Nom et Prénom"]}<br>
-                <strong class="job">Poste :</strong> ${data[i].poste || 'Non renseigné'}<br>
-                <strong class="department">Équipe :</strong> ${data[i]["équipe"] || 'Non renseigné'}<br>
-                <strong>Email :</strong> ${data[i]["Votre adresse mail"] || 'Non renseigné'}<br>
-            </div>
-        `;
-        trombinoscope.appendChild(person);
-    }
-
-    generatePagination(data);
-}
-
-function generatePagination(data) {
-    const pagination = document.getElementById('pagination');
-    pagination.innerHTML = '';
-    const totalPages = Math.ceil(data.length / itemsPerPage);
-
-    for (let page = 1; page <= totalPages; page++) {
-        const button = document.createElement('button');
-        button.innerText = page;
-        button.onclick = () => {
-            currentPage = page;
-            generateTrombinoscope(page, data);
-        };
-        if (page === currentPage) {
-            button.style.fontWeight = 'bold';
+            // Générer à nouveau le trombinoscope avec les données filtrées
+            generateTrombinoscope(1, filteredData);
         }
-        pagination.appendChild(button);
-    }
-}
+
+        function generateTrombinoscope(page, data) {
+            const trombinoscope = document.getElementById('trombinoscope');
+            trombinoscope.innerHTML = '';  
+            const start = (page - 1) * itemsPerPage;
+            const end = Math.min(start + itemsPerPage, data.length);
+
+            for (let i = start; i < end; i++) {
+                const person = document.createElement('div');
+                person.classList.add('person');
+                const imageUrl = data[i]["Vous pouvez ajouter une photo pour personnaliser votre profil et permettre aux autres de mieux associer votre visage à votre nom."] || "https://via.placeholder.com/150";
+                
+                person.innerHTML = `
+                    <img src="${imageUrl}" alt="Photo de ${data[i]["Nom et Prénom"]}">
+                    <div class="fixed-info">
+                        <strong>Nom :</strong> ${data[i]["Nom et Prénom"]}<br>
+                        <strong class="job">Poste :</strong> ${data[i].poste || 'Non renseigné'}<br>
+                        <strong class="department">Équipe :</strong> ${data[i]["équipe"] || 'Non renseigné'}<br>
+                        <strong>Email :</strong> ${data[i]["Votre adresse mail"] || 'Non renseigné'}<br>
+                    </div>
+                `;
+                trombinoscope.appendChild(person);
+            }
+
+            generatePagination(data);
+        }
+
+        function generatePagination(data) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            const totalPages = Math.ceil(data.length / itemsPerPage);
+
+            for (let page = 1; page <= totalPages; page++) {
+                const button = document.createElement('button');
+                button.innerText = page;
+                button.onclick = () => {
+                    currentPage = page;
+                    generateTrombinoscope(page, data);
+                };
+                if (page === currentPage) {
+                    button.style.fontWeight = 'bold';
+                }
+                pagination.appendChild(button);
+            }
+        }
+    </script>
+
+</body>
+</html>
